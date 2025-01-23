@@ -1,0 +1,18 @@
+# Model dosyaları
+app/models/invoice_model/
+*.h5
+*.pb
+*.keras
+
+# TensorFlow ve PyTorch cache
+__pycache__/
+.pytest_cache/
+.cache/
+*.pyc
+
+# Geçici dosyalar
+uploads/
+temp/
+
+# Model cache
+app/models/cache/ 

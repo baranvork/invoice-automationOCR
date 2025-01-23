@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Invoice{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Upload Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Upload Invoice</h3>
+            </div>
+            <div class="card-body">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="fileInput" class="form-label">Select an invoice image:</label>
+                        <input type="file" 
+                               class="form-control form-control-lg" 
+                               id="fileInput" 
+                               name="file" 
+                               accept=".png,.jpg,.jpeg,.pdf"
+                               required>
+                        <div class="form-text">Supported formats: PNG, JPG, JPEG, PDF</div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            Process Invoice
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Card (Initially Hidden) -->
+        <div id="resultsCard" class="card shadow-sm" style="display: none;">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">OCR Results</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Companies</h4>
+                        <div id="companies" class="mb-4"></div>
+
+                        <h4>Addresses</h4>
+                        <div id="addresses" class="mb-4"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Dates</h4>
+                        <div id="dates" class="mb-4"></div>
+
+                        <h4>Amounts</h4>
+                        <div id="amounts"></div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h4>Extracted Text</h4>
+                <pre id="extractedText" class="bg-light p-3 rounded"></pre>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="text-center my-4" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Processing...</span>
+            </div>
+            <p class="mt-2">Processing your invoice...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#uploadForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        $('#loading').show();
+        $('#resultsCard').hide();
+        
+        const formData = new FormData(this);
+        
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    // Update results sections
+                    updateSection('companies', response.entities.companies);
+                    updateSection('addresses', response.entities.addresses);
+                    updateSection('dates', response.entities.dates);
+                    updateSection('amounts', response.entities.amounts);
+                    
+                    // Show extracted text
+                    $('#extractedText').text(response.text || 'No text extracted');
+                    
+                    // Show results card
+                    $('#resultsCard').show();
+                } else {
+                    alert('Error: ' + response.error);
+                }
+            },
+            error: function() {
+                alert('An error occurred while processing the file.');
+            },
+            complete: function() {
+                $('#loading').hide();
+                $('#uploadForm')[0].reset();
+            }
+        });
+    });
+    
+    function updateSection(sectionId, data) {
+        const section = $(`#${sectionId}`);
+        section.empty();
+        
+        if (data) {
+            Object.entries(data).forEach(([key, value]) => {
+                section.append(`
+                    <div class="p-2 mb-2 bg-light rounded">
+                        <strong>${key}:</strong>
+                        <span class="ms-2">${value || 'Not found'}</span>
+                    </div>
+                `);
+            });
+        }
+    }
+});
+</script>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+</style>
+{% endblock %} 
