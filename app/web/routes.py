@@ -25,9 +25,8 @@ def upload_file():
             filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
             
-            # Document processor ile işle
-            document_processor = DocumentProcessor(current_app.config)
-            result = document_processor.process_document(filepath)
+            processor = DocumentProcessor(current_app.config)
+            result = processor.process_document(filepath)
             
             if not result:
                 return jsonify({
@@ -37,9 +36,9 @@ def upload_file():
             
             return jsonify({
                 'success': True,
-                'text': result.get('ocr_details', {}).get('text', ''),
-                'entities': result.get('entities', {}),
-                'confidence': result.get('confidence', 0)
+                'text': result.get('text', ''),
+                'confidence': result.get('confidence', 0),
+                'blocks': result.get('blocks', [])
             })
             
         except Exception as e:

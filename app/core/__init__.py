@@ -1,4 +1,4 @@
 from .document_processor import DocumentProcessor
-from .tf_processor import TensorFlowProcessor
+from .ocr_processor import OCRProcessor
 
-__all__ = ['DocumentProcessor', 'TensorFlowProcessor'] 
+__all__ = ['DocumentProcessor', 'OCRProcessor'] 
