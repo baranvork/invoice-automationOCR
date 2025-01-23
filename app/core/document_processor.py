@@ -4,83 +4,117 @@ import os
 import numpy as np
 from .ocr_processor import OCRProcessor
 from ..utils.file_helpers import save_analysis_results
+from flask import current_app
+from .ner.model import NERModel  # NERProcessor yerine NERModel'i import et
 
 class DocumentProcessor:
     def __init__(self, config=None):
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
         
-        # Sadece TensorFlow işlemcisini yükle
+        # OCR ve NER işlemcilerini yükle
         self.ocr_processor = OCRProcessor()
+        self.ner_processor = NERModel()  # NERProcessor yerine NERModel kullan
 
-    def process(self, file_path):
-        # Görüntüyü yükle
-        image = tf.io.read_file(file_path)
-        image = tf.image.decode_image(image, channels=3)
-        
-        # TensorFlow işlemcisi ile OCR yap
-        results = self.ocr_processor.process_document(image)
-        
-        return {
-            'text': results.get('ocr', {}).get('text', ''),
-            'confidence': results.get('confidence', 0),
-            'entities': results.get('entities', {}),
-            'tables': results.get('tables', [])
-        }
-
-    def process_document(self, image_path):
+    def process_document(self, filepath):
+        """Belgeyi işle"""
         try:
-            # 1. Görüntüyü oku
-            self.logger.info(f"Reading image from: {image_path}")
-            image = cv2.imread(image_path)
+            # Görüntüyü yükle
+            image = self._load_image(filepath)
             if image is None:
-                raise ValueError("Could not read image file")
+                current_app.logger.error(f"Failed to load image: {filepath}")
+                return None
+
+            # OCR işlemi
+            ocr_result = self.ocr_processor.process_document(image)
             
-            # 2. Görüntü ön işleme
-            self.logger.info("Preprocessing image...")
-            preprocessed_image = self._preprocess_image(image)
+            # Debug için OCR sonuçlarını logla
+            current_app.logger.info(f"OCR Result for {filepath}: {ocr_result}")
             
-            # 3. OCR işleme
-            self.logger.info("Processing with OCR...")
-            results = self.ocr_processor.process_document(preprocessed_image)
+            if not ocr_result:
+                current_app.logger.error(f"OCR processing failed for {filepath}")
+                return None
+
+            # OCR sonuçlarını kontrol et
+            if not ocr_result.get('text'):
+                current_app.logger.warning(f"No text extracted from {filepath}")
+
+            # NER işlemi
+            text = ocr_result.get('text', '')
+            ner_result = self.ner_processor.process_text(text)
+
+            # Sonuçları birleştir
+            return {
+                'success': True,
+                'text': text,
+                'confidence': ocr_result.get('confidence', 0),
+                'invoice_data': ner_result if ner_result else {}
+            }
+        except Exception as e:
+            current_app.logger.error(f"Error processing document: {str(e)}")
+            return None
+
+    def _load_image(self, filepath):
+        """Görüntüyü yükle ve ön işle"""
+        try:
+            # Görüntüyü oku
+            image = cv2.imread(filepath)
+            if image is None:
+                raise ValueError("Failed to load image")
+
+            # Görüntü boyutunu kontrol et
+            max_dimension = self.config.get('OCR_MAX_DIMENSION', 1800)
+            height, width = image.shape[:2]
             
-            if not results.get('success'):
-                raise ValueError(results.get('error', 'Unknown processing error'))
-            
-            return self._format_results(results)
+            # Boyut çok büyükse yeniden boyutlandır
+            if height > max_dimension or width > max_dimension:
+                scale = max_dimension / max(height, width)
+                new_width = int(width * scale)
+                new_height = int(height * scale)
+                image = cv2.resize(image, (new_width, new_height))
+
+            return image
 
         except Exception as e:
-            self.logger.error(f"Error processing document: {str(e)}")
+            self.logger.error(f"Error loading image: {str(e)}")
             return None
 
     def _preprocess_image(self, image):
         """Görüntü ön işleme"""
         try:
-            # Boyut kontrolü
-            max_dimension = 1800
-            height, width = image.shape[:2]
-            if max(height, width) > max_dimension:
-                scale = max_dimension / max(height, width)
-                image = cv2.resize(image, None, fx=scale, fy=scale)
+            # Gri tonlamaya çevir
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             
             # Gürültü azaltma
-            denoised = cv2.fastNlMeansDenoisingColored(image)
+            denoised = cv2.fastNlMeansDenoising(gray)
+            
+            # Adaptif eşikleme
+            thresh = cv2.adaptiveThreshold(
+                denoised, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                cv2.THRESH_BINARY, 11, 2
+            )
             
             # Keskinleştirme
             kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-            sharpened = cv2.filter2D(denoised, -1, kernel)
+            sharpened = cv2.filter2D(thresh, -1, kernel)
             
             return sharpened
-            
         except Exception as e:
             self.logger.error(f"Error in preprocessing: {str(e)}")
             return image
 
     def _format_results(self, results):
         """Sonuçları formatla"""
-        return {
-            'success': True,
-            'text': results['ocr']['text'],
-            'confidence': results['ocr']['confidence'],
-            'blocks': results['ocr']['blocks']
-        } 
+        try:
+            # Debug için
+            self.logger.info(f"Formatting results: {results}")
+            
+            return {
+                'success': True,
+                'text': results.get('ocr', {}).get('text', ''),
+                'confidence': results.get('ocr', {}).get('confidence', 0),
+                'blocks': results.get('ocr', {}).get('blocks', [])
+            }
+        except Exception as e:
+            self.logger.error(f"Error formatting results: {str(e)}")
+            return None 

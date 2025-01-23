@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 import os
-from app.core.ocr_engine import OCREngine
+from app.core.ocr_processor import OCRProcessor
 from app.core.ner.model import NERModel
 
 api_bp = Blueprint('api', __name__)
@@ -12,7 +12,7 @@ ner_model = None
 def initialize():
     global ocr_engine, ner_model
     if ocr_engine is None:
-        ocr_engine = OCREngine(current_app.config)
+        ocr_engine = OCRProcessor()
     if ner_model is None:
         ner_model = NERModel()
 
@@ -32,24 +32,32 @@ def process_invoice():
         
         try:
             # OCR işlemi
-            text = ocr_engine.process_image(filepath)
+            result = ocr_engine.process_document(filepath)
             
+            if not result.get('success'):
+                return jsonify({
+                    'success': False,
+                    'error': 'OCR processing failed'
+                }), 500
+
             # NER işlemi
-            entities = ner_model.extract_entities(text['text'])
+            entities = ner_model.extract_entities(result['ocr']['text'])
             
             return jsonify({
                 'success': True,
-                'text': text['text'],
-                'entities': {
-                    'companies': entities['companies'],
-                    'amounts': entities['amounts'],
-                    'dates': entities['dates'],
-                    'addresses': entities['addresses']
-                }
+                'text': result['ocr']['text'],
+                'confidence': result['ocr']['confidence'],
+                'entities': entities,
+                'blocks': result['ocr']['blocks']
             })
+            
         except Exception as e:
+            current_app.logger.error(f"Error processing upload: {str(e)}")
             return jsonify({'error': str(e)}), 500
+            
         finally:
             # Dosyayı sil
             if os.path.exists(filepath):
-                os.remove(filepath) 
+                os.remove(filepath)
+    
+    return jsonify({'error': 'Invalid file type'}), 400 
