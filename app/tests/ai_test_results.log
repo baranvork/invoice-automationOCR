@@ -1,0 +1,107 @@
+
+2025-01-23 20:08:14,509 - INFO
+=== DOCUMENT PROCESSING STARTED ===
+
+
+2025-01-23 20:08:14,509 - INFO
+
+=== OCR PROCESSING ===
+
+
+2025-01-23 20:08:16,611 - ERROR
+
+Processing Error:
+---------------
+Error Type: TesseractNotFoundError
+Error Message: tesseract is not installed or it's not in your PATH. See README file for more information.
+Stack Trace: Traceback (most recent call last):
+  File "C:\Users\baran\PycharmProjects\invoice-automationOCR\.venv1\Lib\site-packages\pytesseract\pytesseract.py", line 275, in run_tesseract
+    proc = subprocess.Popen(cmd_args, **subprocess_args())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\baran\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Users\baran\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1538, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] Sistem belirtilen dosyayý bulamýyor
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\baran\PycharmProjects\invoice-automationOCR\app\core\ocr_processor.py", line 56, in process_document
+    text = pytesseract.image_to_string(image, lang='eng')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\baran\PycharmProjects\invoice-automationOCR\.venv1\Lib\site-packages\pytesseract\pytesseract.py", line 486, in image_to_string
+    return {
+           ^
+  File "C:\Users\baran\PycharmProjects\invoice-automationOCR\.venv1\Lib\site-packages\pytesseract\pytesseract.py", line 489, in <lambda>
+    Output.STRING: lambda: run_and_get_output(*args),
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\baran\PycharmProjects\invoice-automationOCR\.venv1\Lib\site-packages\pytesseract\pytesseract.py", line 352, in run_and_get_output
+    run_tesseract(**kwargs)
+  File "C:\Users\baran\PycharmProjects\invoice-automationOCR\.venv1\Lib\site-packages\pytesseract\pytesseract.py", line 280, in run_tesseract
+    raise TesseractNotFoundError()
+pytesseract.pytesseract.TesseractNotFoundError: tesseract is not installed or it's not in your PATH. See README file for more information.
+
+            
+
+
+2025-01-23 20:15:58,980 - INFO
+=== DOCUMENT PROCESSING STARTED ===
+
+
+2025-01-23 20:15:58,980 - INFO
+
+=== OCR PROCESSING ===
+
+
+2025-01-23 20:16:16,367 - INFO
+Extracted invoice data: {'vendor': 'tan woon yann', 'date': '', 'total_amount': 30.9, 'tax_amount': 0.0, 'invoice_number': 'CASH', 'tax_id': '86867', 'category': 'purchase'}
+
+
+2025-01-23 20:16:16,368 - INFO
+
+=== PROCESSING COMPLETED ===
+
+
+2025-01-23 20:16:16,368 - INFO
+OCR Result for C:\Users\baran\PycharmProjects\invoice-automationOCR\app\tests\test-images\invoice.jpg: {'success': True, 'text': 'tan woon yann\n\nMR O.T.Y. (M) SON BHD\n(CO.REG : 86867 1-D)\n\n{OT 1@5)-A & 1Q51-B, JALAN KPB 6,\nKAWASAN PERINDUSTRIAN BALAKONG,\n43300 SER] KEMBANGAN, SELANGOR\n(TESCO PUTRA NILAI)\nINVOICE\n\nKILAT AUTO ECO ASH & SHINE £51000 It\nWA4S-/2A - 12\n\n£916500133 exe 9.17 Set\n"ECO AUTO WASH &HAX EW-1000-11\n\nA 12\n\n16500126 1X 4.62 4.62\nWO40 277ml MOQ 2572\n\nWASS-A - 24\n\n00084 TX W281 28\nKLEENSO AJAIB 99 SERAT WANYI 9006\nWOOO - 15\n\n51400385 LARP TeAg 145\nERCHTEF 7138682PCS\n\nPL2Pdl 1-4 - 6/900\n\ng090822 1X 4.50 4.50\n\nItem(s) : 5 Qty(s) : 5\nTota] RM 30,9)\nROUNDING ADJUST RM 0.01\nTOTAL ROUNDED. RM 30.90\nCASH RM 51.00\nCHANGE RM 20.10\n+ +\n18-11-18 13:58 SHOI 2163 12 RO00002902\n\nOPERATOR TRAINEE CASHIER\n\nEXCHANGE ARE ALLOWED WITHIN\n7 DAYS WITH RECEIPT.\nSTRICTLY NO CASH REFUND,\n', 'confidence': 0, 'invoice_data': {'vendor': 'tan woon yann', 'date': '', 'total_amount': 30.9, 'tax_amount': 0.0, 'invoice_number': 'CASH', 'tax_id': '86867', 'category': 'purchase'}}
+
+
+2025-01-23 20:16:16,368 - INFO
+Loading English NLP model...
+
+
+2025-01-23 20:16:29,778 - INFO
+Extracted invoice data: {'vendor': 'MR O.T.Y. (M', 'date': '', 'total_amount': 30.9, 'tax_amount': 0.0, 'invoice_number': 'CASH', 'tax_id': '86867', 'category': 'service'}
+
+
+2025-01-23 20:27:04,022 - INFO
+=== DOCUMENT PROCESSING STARTED ===
+
+
+2025-01-23 20:27:04,023 - INFO
+
+=== OCR PROCESSING ===
+
+
+2025-01-23 20:27:05,951 - INFO
+Extracted invoice data: {'vendor': 'Axo dig:', 'date': '', 'total_amount': 112.46, 'tax_amount': 0.0, 'invoice_number': '89', 'tax_id': 'odoan0s89624', 'category': 'utility'}
+
+
+2025-01-23 20:27:05,951 - INFO
+
+=== PROCESSING COMPLETED ===
+
+
+2025-01-23 20:27:05,951 - INFO
+OCR Result for C:\Users\baran\PycharmProjects\invoice-automationOCR\app\tests\test-images\invoice.jpg: {'success': True, 'text': 'Axo dig:\n\nPERNIAGAAR ZHENG HUI\nJMOS2B956-V\nNO.89 JALAN PERMAS 9/5\nBANDAR BARU PERMAS JAYA\n81760 JOHOR BAHRU\nTEL: 07-386 7524 FAX: 07-386 3793.\n\nGST NO : odoan0s89624\nSIMPLIFIED TAX INVOICE\n“GOGIANT ENGINEERING ( °\n\nRecslptz# CS00082562\n\nSalesperson: Date: 1202/2018\nCashier: USER Time: 08:30°20\nTR in,\ntiem _. Sty RSP__ Amount\ne239 &B 1 1600 18.6¢\nSR: 11" PROWESS HIDUTY SILICONE GUN G-D2\n8586075109147 aA 3 7.00 21.00\nSR: XTRASEAL RIV ACETIC SILICONE SA-107\nord GBo1 1800 48.00\nSR: CENTRAL PUNCH SET SPCS- 1/4",5/32".1/4"\n12625 ae 1 80.00 sac\n‘SR. 24" MARKSMAN PIPE WRENCH\n2016 GA 3 070 24¢\nSR: PVC WIRE TAPE 1PC X 7YD\n“TOT ary\n(Excluded GST) Sub Total (RM) 706.10\nDiscourt (RM) 0,00\nTotal OST (RM) 637\nRounding (RM) : ~0.02\n\nTotal (Fay + 112.46\nGASH : 112.48\nChange (RM): 6.00\n\nGST SUMMARY\n\nGOODS SOLD ARE NOT RETURNABLE,\nTHANK YOU,\n', 'confidence': 0, 'invoice_data': {'vendor': 'Axo dig:', 'date': '', 'total_amount': 112.46, 'tax_amount': 0.0, 'invoice_number': '89', 'tax_id': 'odoan0s89624', 'category': 'utility'}}
+
+
+2025-01-23 20:27:05,952 - INFO
+Loading English NLP model...
+
+
+2025-01-23 20:27:33,079 - INFO
+Extracted invoice data: {'vendor': 'Discourt', 'date': '', 'total_amount': 112.46, 'tax_amount': 706.1, 'invoice_number': '89', 'tax_id': 'odoan0s89624', 'category': 'utility'}
+
